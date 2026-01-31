@@ -51,18 +51,18 @@ def upload_image():
             public_url = image_data["link"]
             delete_hash = image_data["deletehash"]
 
-            # Étape 2: Programmer la suppression après 5 minutes (300 secondes)
+            # Étape 2: Programmer la suppression après 2 minutes (120 secondes)
             scheduler.add_job(
                 func=delete_imgur_image,
                 trigger='date',
-                run_date=time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time() + 300)),
+                run_date=time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time() + 120)),
                 args=[delete_hash]
             )
 
             return jsonify({
                 "status": "success",
                 "image_url": public_url,
-                "message": "L'image sera supprimée automatiquement dans 5 minutes pour protéger votre vie privée."
+                "message": "L'image sera supprimée automatiquement dans 2 minutes pour protéger votre vie privée."
             })
         else:
             return jsonify({
