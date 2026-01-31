@@ -1,7 +1,5 @@
 from flask import Flask, request, jsonify
 import requests
-import re
-import base64
 
 app = Flask(__name__)
 
@@ -14,19 +12,17 @@ def upload_image():
         return jsonify({"error": "Paramètre 'img' manquant"}), 400
 
     try:
+        # L'URL d'upload ImgBB avec la clé API
         imgbb_url = f"https://api.imgbb.com/1/upload?key={API_KEY}"
         
-        # Vérifier si l'entrée est une chaîne Base64 (format data:image/...)
+        # Si c'est du Base64 (data:image/...)
         if image_input.startswith('data:image'):
-            # Extraire uniquement la partie base64
-            # Format attendu : data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA...
-            base64_data = re.sub(r'^data:image/.+;base64,', '', image_input)
-            payload = {'image': base64_data}
-        else:
-            # Sinon, on considère que c'est une URL classique
-            payload = {'image': image_input}
-
-        response = requests.post(imgbb_url, data=payload)
+            # On retire le préfixe 'data:image/...;base64,' pour ne garder que la donnée
+            if ',' in image_input:
+                image_input = image_input.split(',', 1)[1]
+        
+        # Envoi à ImgBB (ImgBB accepte soit une URL, soit du base64 dans le champ 'image')
+        response = requests.post(imgbb_url, data={'image': image_input})
         
         if response.status_code == 200:
             data = response.json()
